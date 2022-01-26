@@ -1,0 +1,9 @@
+.card img{
+    max-height: 300px;
+    max-width: 300px;
+}
+
+.price{
+    font-size:  30px;
+    font-weight: bold;
+}

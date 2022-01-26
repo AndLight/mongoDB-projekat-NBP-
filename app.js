@@ -4,10 +4,15 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const exphbs = require('express-handlebars');
-
+const mongoose = require('mongoose');
+// const MongoClient = require('mongodb').MongoClient;
 
 var indexRouter = require('./routes/index');
 
+// mongoose.connect('localhost: 27017/shopingdb');
+mongoose.connect('mongodb://localhost/shopingdb')
+        .then(console.log('MongoDB is connected'))
+        .catch(err => console.log('MongoDB error: '+err));
 
 //#region [rgba (0,128,128, 0.1)] SETUP
     var app = express();
