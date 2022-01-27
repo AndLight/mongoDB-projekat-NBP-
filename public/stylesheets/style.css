@@ -3,6 +3,10 @@
     max-width: 300px;
 }
 
+.card{
+    max-width: 350px;
+}
+
 .price{
     font-size:  30px;
     font-weight: bold;

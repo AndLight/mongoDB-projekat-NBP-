@@ -6,6 +6,9 @@ var logger = require('morgan');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 // const MongoClient = require('mongodb').MongoClient;
+const Handlebars = require('handlebars');
+const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
+
 
 var indexRouter = require('./routes/index');
 
@@ -19,7 +22,7 @@ mongoose.connect('mongodb://localhost/shopingdb')
 
 
     // view engine setup
-    app.engine('.hbs', exphbs.engine({defaultLayout: 'layout', extname: '.hbs'}))
+    app.engine('.hbs', exphbs.engine({defaultLayout: 'layout', extname: '.hbs',handlebars: allowInsecurePrototypeAccess(Handlebars)}))
     app.set('view engine', '.hbs');
 
     app.use(logger('dev'));
