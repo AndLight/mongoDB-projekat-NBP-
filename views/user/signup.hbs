@@ -1,0 +1,42 @@
+<div class="">
+    <div class="">
+        <div class="row">
+            <div class="col-md-4 signUpForm">
+                <h1>Sign up</h1>
+
+                {{#if validationErr}}
+                    {{#each validationErr}}
+                        <div class="alert alert-danger">{{this}}</div>
+                    {{/each}}
+                {{/if}}
+
+                {{#if messErr}}
+                    <div class="alert alert-danger">{{this}}</div>
+                {{/if}}
+
+                {{#if userErr}}
+                    <div class="alert alert-danger">The user already exists</div>
+                {{/if}}
+
+                {{#if userSuc}}
+                    <div class="alert alert-success">The user is added</div>
+                {{/if}}
+
+                <form action="/user/signup" method="post">
+
+                    <div class="form-group">
+                        <label for="email">email</label>
+                        <input type="text" value="{{helperObject.email}}" id="email" name="email" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">password</label>
+                        <input type="text" value="{{helperObject.password}}" id="password" name="password" class="form-control">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary form-control">Sign up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

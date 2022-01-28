@@ -7,7 +7,10 @@ const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 // const MongoClient = require('mongodb').MongoClient;
 const Handlebars = require('handlebars');
+var validator = require('express-validator');
+
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
+
 
 
 var indexRouter = require('./routes/index');
@@ -28,6 +31,7 @@ mongoose.connect('mongodb://localhost/shopingdb')
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
+    // app.use(validator);
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
 
