@@ -75,12 +75,6 @@ const { body, validationResult } = require('express-validator');
 
                           let message = [];
 
-                          // console.log(("/////////////////////////////////////"))
-                          //   errors.errors.forEach(function(error){
-                          //         console.log(error.msg)
-                          //   });
-                          // console.log("/////////////////////////////////////")
-                          
                           if(errors){
                             errors.errors.forEach(function(error){
                               console.log(error.msg)
@@ -128,5 +122,73 @@ const { body, validationResult } = require('express-validator');
   });
 //#endregion    
 ///////////////////////////////////////////////////////
+//#region [rgba (128,128,128, 0.1)] USER SIGNIN
+router.get ('/user/signin', function(req, res, next){
+  res.render('user/signin');
+});
 
+router.post ('/user/signin',
+              body('email')
+                .notEmpty()
+                .withMessage('Email field cant be empty')
+                .isEmail()
+                .withMessage('Please enter valid email'),
+
+              body('password')
+                .notEmpty()
+                .withMessage('Password field cant be empty'),
+
+              function(req, res, next){
+
+
+                    let email = req.body.email;
+                    let password = req.body.password;
+                    
+                    const errors = validationResult(req);
+
+                    if (!errors.isEmpty()) {
+
+
+                          let message = [];
+
+                          if(errors){
+                            errors.errors.forEach(function(error){
+                              console.log(error.msg)
+                                message.push(error.msg);
+                            });
+                          };
+                            console.log(message)
+                          res.render('user/signin', {validationErr: message, email: email});
+                    }
+
+                    else{
+
+                        User.findOne({'email': email}, function(err, userSearch){
+
+                          if (err){
+                                    console.log('Error: '+err);
+                                    res.render('user/signin', {messErr: err, email: email});     
+                          };
+                          if (!userSearch){
+                                    console.log('Error: The user does not exist')
+                                    console.log(userSearch)
+                                    res.render('user/signin', {userErrU: true, email: email});
+                                
+                          }
+                            else{
+
+                                if(userSearch.password != password){
+                                    console.log('Error: The wrong password')
+                                    console.log(userSearch.password)
+                                    res.render('user/signin', {userErrP: true, email: email});
+                                }
+                                  else{
+                                    //Dodaj nacin da se sacuva log in i prikaze profil info i funkcionalnost
+                                    res.render('user/profile');
+                                  }
+                              }
+                        })
+                    }
+  });
+//#endregion  
 module.exports = router;

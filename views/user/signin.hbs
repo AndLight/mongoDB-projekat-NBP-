@@ -1,1 +1,45 @@
-<h1>Sign In</h1>
+<div class="">
+    <div class="">
+        <div class="row">
+            <div class="col-md-4 signUpForm">
+                <h1>Sign in</h1>
+
+                {{#if validationErr}}
+                    {{#each validationErr}}
+                        <div class="alert alert-danger">{{this}}</div>
+                    {{/each}}
+                {{/if}}
+
+                {{#if messErr}}
+                    <div class="alert alert-danger">{{this}}</div>
+                {{/if}}
+
+                {{#if userErrU}}
+                    <div class="alert alert-danger">The user does not exist</div>
+                {{/if}}
+                {{#if userErrP}}
+                    <div class="alert alert-danger">Wrong password</div>
+                {{/if}}
+
+                {{#if userSuc}}
+                    <div class="alert alert-success">The user is added</div>
+                {{/if}}
+
+                <form action="/user/signin" method="post">
+
+                    <div class="form-group">
+                        <label for="email">email</label>
+                        <input type="text" value="{{email}}" id="email" name="email" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">password</label>
+                        <input type="text" id="password" name="password" class="form-control">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary form-control">Sign in</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
