@@ -6,7 +6,10 @@ var logger = require('morgan');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const Handlebars = require('handlebars');
-const sessions = require('express-session');
+const session = require('express-session');
+const passport = require('passport');
+const flash = require('connect-flash');
+require('./config/passport');
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
 
 var app = express();
@@ -21,18 +24,13 @@ var app = express();
   // let mysession = {email: ""};
 
   //session set up
-  app.use(sessions({
-    secret: "thisismysecrctekey",
-    saveUninitialized: false,           //if we have not modified the sesion do you save?
-    cookie: { maxAge: timeout },
-    resave: false                     //for every request to server make new sesion
-  }));
+  // app.use(session({
+  //   secret: "thisismysecrctekey",
+  //   saveUninitialized: false,           //if we have not modified the sesion do you save?
+  //   cookie: { maxAge: timeout },
+  //   resave: false                     //for every request to server make new sesion
+  // }));
 
-
-  let logedInObj = {
-      email: null,
-      password: null
-    }
 //#endregion    
 ///////////////////////////////////////////////////////
 
@@ -53,19 +51,29 @@ mongoose.connect('mongodb://localhost/shopingdb')
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     app.use(cookieParser());
+    app.use(session({
+      secret: "thisismysecrctekey",
+      saveUninitialized: false,           //if we have not modified the sesion do you save?
+      cookie: { maxAge: timeout },
+      resave: false                     //for every request to server make new sesion
+    }));
+    //session maybe here
+    app.use(flash());
+    app.use(passport.initialize());
+    app.use(passport.session());
     app.use(express.static(path.join(__dirname, 'public')));
 
-    app.use(function(req, res, next){
-      if(logedInObj.email !== null){
-        res.locals.login = true;
-        console.log("Loged in")
-      }
-      else{
-        res.locals.login = false;
-        console.log("Not loged in")
-      }
-      next();
-    });
+    // app.use(function(req, res, next){
+    //   if(logedInObj.email !== null){
+    //     res.locals.login = true;
+    //     console.log("Loged in")
+    //   }
+    //   else{
+    //     res.locals.login = false;
+    //     console.log("Not loged in")
+    //   }
+    //   next();
+    // });
 
     app.use('/', indexRouter);
 
@@ -89,4 +97,4 @@ mongoose.connect('mongodb://localhost/shopingdb')
 ///////////////////////////////////////////////////////
 
 module.exports = app;
-module.exports.logedInObj = logedInObj;
+

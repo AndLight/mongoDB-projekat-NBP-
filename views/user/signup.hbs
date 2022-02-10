@@ -34,7 +34,13 @@
                         <input type="text" value="{{helperObject.password}}" id="password" name="password" class="form-control">
                     </div>
 
+                    {{!-- <input type="hidden" name="_csrf" value="{{csrfToken}}"> --}}
+
                     <button type="submit" class="btn btn-primary form-control">Sign up</button>
+
+                    <h1 class="delete"> Protection token:</h1>
+                    {{ csrfToken }}
+                    <h1 class="delete">Debug only Delete for final submit</h1>
                 </form>
             </div>
         </div>

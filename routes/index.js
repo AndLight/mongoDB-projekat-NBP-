@@ -3,10 +3,14 @@ var router = express.Router();
 
 var Product = require('../models/product');
 var User = require('../models/user');
-// var appLink = require("../app")
+// var csrf = require('csurf');
+var passport = require('passport')
+
+// var csrfProtection = csrf();
+// router.use(csrfProtection);       //All routs should be protected
 
 const { body, validationResult } = require('express-validator');
-const session = require('express-session');
+
 
 //#region [rgba (128,128,128, 0.1)]  HOME PAGE
   router.get('/', function(req, res, next) {
@@ -33,9 +37,17 @@ const session = require('express-session');
 ///////////////////////////////////////////////////////
 //#region [rgba (0,128,128, 0.1)] USER SIGNUP
 
-  router.get ('/user/signup', notLoggedIn, function(req, res, next){
+  router.get ('/user/signup', function(req, res, next){
+            // res.render('user/signup', {csrfToken: req.csrfToken()});
             res.render('user/signup');
   });
+
+  // router.post ('/user/signup', passport.authenticate('local.signup', {
+  //     successRedirect: 'user/profie',
+  //     failureredirect: 'user/signup',
+  //     failureFlash: true
+  // }));
+  
 
   router.post ('/user/signup',
               body('email')
