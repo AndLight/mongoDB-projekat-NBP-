@@ -13,6 +13,7 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "express-handlebars": "^6.0.2",
+    "express-session": "^1.17.2",
     "express-validator": "^6.14.0",
     "hbs": "*",
     "http-errors": "~1.6.3",

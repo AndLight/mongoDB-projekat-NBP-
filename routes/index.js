@@ -3,8 +3,10 @@ var router = express.Router();
 
 var Product = require('../models/product');
 var User = require('../models/user');
+// var appLink = require("../app")
 
 const { body, validationResult } = require('express-validator');
+const session = require('express-session');
 
 //#region [rgba (128,128,128, 0.1)]  HOME PAGE
   router.get('/', function(req, res, next) {
@@ -31,7 +33,7 @@ const { body, validationResult } = require('express-validator');
 ///////////////////////////////////////////////////////
 //#region [rgba (0,128,128, 0.1)] USER SIGNUP
 
-  router.get ('/user/signup', function(req, res, next){
+  router.get ('/user/signup', notLoggedIn, function(req, res, next){
             res.render('user/signup');
   });
 
@@ -123,9 +125,15 @@ const { body, validationResult } = require('express-validator');
 //#endregion    
 ///////////////////////////////////////////////////////
 //#region [rgba (128,128,128, 0.1)] USER SIGNIN
-router.get ('/user/signin', function(req, res, next){
+router.get ('/user/signin', notLoggedIn, function(req, res, next){
   res.render('user/signin');
 });
+
+
+// let logedInObj = {
+//   email: null,
+//   password: null
+// }
 
 router.post ('/user/signin',
               body('email')
@@ -184,11 +192,77 @@ router.post ('/user/signin',
                                 }
                                   else{
                                     //Dodaj nacin da se sacuva log in i prikaze profil info i funkcionalnost
+                                    // logedInObj.email = email;
+                                    // console.log(logedInObj);
+                                    
+                                    // req.mysession = req.sessions;
+                                    // console.log(mysession)
+
+                                    // req.mysession.email = email;
+                                    // console.log(mysession)
+                                    // console.log(req.session);
+                                    // console.log(req.session.email);
+
+                                    appLink.logedInObj.email = email;
+
                                     res.render('user/profile');
                                   }
                               }
                         })
                     }
   });
-//#endregion  
+
+  function isLoggedIn(req, res, next){
+      // if(req.session){
+      if(req.mysession){
+        console.log("isLoggedIn")
+        console.log(req.mysession)
+        return next();
+    }
+    res.redirect('user/pleaseLogIn')
+  }
+
+  function notLoggedIn(req, res, next){
+    // if(!req.session){
+    if(!req.mysession){
+      console.log("notLoggedIn")
+      console.log(req.mysession)
+      return next();
+    }
+    res.redirect('/')
+  }
+
+//#endregion
+///////////////////////////////////////////////////////
+//#region [rgba (128,5,128, 0.1)] PROFILE PAGE 
+router.get ('/user/profile',isLoggedIn, function(req, res, next){
+  res.render('user/profile');
+});
+
+
+//#endregion
+///////////////////////////////////////////////////////
+//#region [rgba (55,55,5, 0.1)] LOG OUT
+  router.get('/user/logout', function(req, res, next){
+    // if(logedInObj.email != null){
+    //   logedInObj.email = null;
+    //   res.render('user/logedOutSucess');
+    // }
+    //   res.render('user/pleaseLogIn');
+    console.log("Log out ")
+    console.log(req.session)
+    req.mysession.destroy();
+    console.log("Log out after")
+    console.log(req.session)
+    res.redirect('/');
+  });
+//#endregion
+///////////////////////////////////////////////////////
+//#region [rgba (128,5,5, 0.1)] SHOPING CART 
+
+//#endregion
+
+// export const logedInObj = 'logedInObj';
+
+
 module.exports = router;

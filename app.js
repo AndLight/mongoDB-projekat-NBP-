@@ -5,13 +5,36 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
-// const MongoClient = require('mongodb').MongoClient;
 const Handlebars = require('handlebars');
-var validator = require('express-validator');
-
+const sessions = require('express-session');
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
 
+var app = express();
+// var mysesion = sessions();
 
+//#region [rgba (0,128,128, 0.1)] SESION SET UP
+//session middleware https://www.section.io/engineering-education/session-management-in-nodejs-using-expressjs-and-express-session/
+  
+  const timeout = 1000 * 60 * 60 * 2; //2h
+
+  // a variable to save a session
+  // let mysession = {email: ""};
+
+  //session set up
+  app.use(sessions({
+    secret: "thisismysecrctekey",
+    saveUninitialized: false,           //if we have not modified the sesion do you save?
+    cookie: { maxAge: timeout },
+    resave: false                     //for every request to server make new sesion
+  }));
+
+
+  let logedInObj = {
+      email: null,
+      password: null
+    }
+//#endregion    
+///////////////////////////////////////////////////////
 
 var indexRouter = require('./routes/index');
 
@@ -21,8 +44,6 @@ mongoose.connect('mongodb://localhost/shopingdb')
         .catch(err => console.log('MongoDB error: '+err));
 
 //#region [rgba (0,128,128, 0.1)] SETUP
-    var app = express();
-
 
     // view engine setup
     app.engine('.hbs', exphbs.engine({defaultLayout: 'layout', extname: '.hbs',handlebars: allowInsecurePrototypeAccess(Handlebars)}))
@@ -31,9 +52,20 @@ mongoose.connect('mongodb://localhost/shopingdb')
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
-    // app.use(validator);
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
+
+    app.use(function(req, res, next){
+      if(logedInObj.email !== null){
+        res.locals.login = true;
+        console.log("Loged in")
+      }
+      else{
+        res.locals.login = false;
+        console.log("Not loged in")
+      }
+      next();
+    });
 
     app.use('/', indexRouter);
 
@@ -57,3 +89,4 @@ mongoose.connect('mongodb://localhost/shopingdb')
 ///////////////////////////////////////////////////////
 
 module.exports = app;
+module.exports.logedInObj = logedInObj;
