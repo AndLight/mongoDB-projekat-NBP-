@@ -1,1 +1,36 @@
-<h1>Profil je ovo</h1>
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <h1>Profile for {{mail}}</h1>
+        <hr>
+
+        {{#each orders}}
+        <div class="container">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <ul class="list-group">
+                        {{#each this.items }}
+                            <div class="row align-items-start">
+                                <li class="list-group-item col">
+                                    <span class="badge">Price: {{ this.price }}</span>
+                                </li>
+                                <li class="list-group-item col">
+                                    <span class="badge">Title: {{ this.item.title }}</span>
+                                </li>
+                                <li class="list-group-item col">
+                                    <span class="badge">Amount: {{ this.num }}</span>
+                                </li>
+                            </div>
+                        {{/each}}
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                    <strong>Total Price: ${{ this.cart.totalPrice }}</strong>
+                </div>
+            </div>
+        </div>
+        <br>
+        {{/each}}
+        
+
+    </div>
+</div>

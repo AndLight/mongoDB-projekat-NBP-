@@ -1,0 +1,41 @@
+<div class="container"> 
+    <div class="row">
+        
+        <h1>Checkout</h1>
+        <h4>Your Total: {{total}}$</h4>
+        
+        <form action="/checkout" method="post" id="checkout-form">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" name="name" id="name" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" name="address" id="address" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="form-group">
+                        <label for="creditCard">Credit Card Number</label>
+                        <input type="text" name="creditCard" id="creditCard" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+            <br>    
+            <button type="submit" class="btn btn-success">Buy</button>
+            
+        </form>
+        
+    </div>
+    
+    <br>
+    <h3 class="text-danger">Disclamer:</h3>
+    <h6 class="text-danger">Paying is not implemented. Just saving to database.</h6>
+    <h4 class="text-success">Just click Buy</h4>
+</div> 

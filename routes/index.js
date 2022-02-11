@@ -1,12 +1,13 @@
-var express = require('express');
-var router = express.Router();
-var bcrypt = require('bcrypt-nodejs')
+let express = require('express');
+let router = express.Router();
+let bcrypt = require('bcrypt-nodejs')
 let LocalStrategy   = require('passport-local').Strategy;
+let passport = require('passport');
 
-var Product = require('../models/product');
-var User = require('../models/user');
-var passport = require('passport');
-var Cart = require('../models/cart');
+let Product = require('../models/product');
+let User = require('../models/user');
+let Cart = require('../models/cart');
+let Order = require('../models/order');
 // const initializePassport  =require('../config/passport');
 
 const { body, validationResult } = require('express-validator');
@@ -189,7 +190,8 @@ router.post ('/user/signin',
                                       logedInMail = email;
                                       sesionObj = req.session;
                                       sesionObj.email=email;
-                                      res.render('user/profile');
+                                      // res.render('user/profile');
+                                      res.redirect('/')
                                     };
                                   });
                                   
@@ -197,6 +199,7 @@ router.post ('/user/signin',
                         })
                     }
   });
+
   let sesionObj;
   function isLoggedIn(req, res, next) {
     // if (logedInMail !== null) {
@@ -204,25 +207,57 @@ router.post ('/user/signin',
     // }
     // res.redirect('/user/signin');
     if(req.session.email){
-      console.log("req.session: ")
-      console.log(req.session.email)
+      // console.log("req.session: ")
+      // console.log(req.session.email)
       return next();
     }
     console.log(req.session.email)
-    res.redirect('/user/signin');
+    res.redirect('/user/signup');
 }
 
-function notLoggedIn(req, res, next) {
-    if (logedInMail == null) {
-        return next();
-    }
-    res.redirect('/');
-}
 //#endregion
 ///////////////////////////////////////////////////////
 //#region [rgba (128,5,128, 0.1)] PROFILE PAGE 
 router.get ('/user/profile',isLoggedIn, function(req, res, next){
-  res.render('user/profile');
+
+  Order.find({mail: req.session.email}, function(err, orders){
+      if(err){console.log(err)}
+      
+      let cart;
+      let orderArr = [];
+    orders.forEach(function(order){
+      // console.log(order.cart.items)
+      cart = new Cart(order.cart);
+
+      console.log("cart: ")
+      console.log(cart)
+      console.log("////////////////////////////////////////////////")
+
+      order.items = cart.generateArray();
+      orderArr.push(cart.generateArray());
+      
+      console.log("order.cart")
+      console.log(order.items)
+    })
+    console.log("////////////////////////////////////////////////")
+    console.log("orders")
+    console.log(orders)
+
+    console.log("////////////////////////////////////////////////")
+    console.log("orderArr")
+    console.log(orderArr)
+    // let br = 0;
+    // orders.forEach(function(ord){
+    //   console.log(br)
+    //   console.log(ord.cart)
+    //   br++;
+    // })
+    let arr = [1,2,3,4]
+    
+    res.render('user/profile', {orders: orders, mail: req.session.email });
+  });
+
+  // res.render('user/profile');
 });
 
 
@@ -244,6 +279,8 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
     // res.redirect('/');
     req.logout();
     delete req.session.email;
+    delete req.session.cart;
+    // console.log(req.session.cart)
     // console.log("logout: ")
     // console.log(req.session.email)
     res.redirect('/');
@@ -252,8 +289,8 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
 ///////////////////////////////////////////////////////
 //#region [rgba (128,5,5, 0.1)] SHOPING CART 
   router.get('/add-to-cart/:id', function(req, res, next){
-    var productId = req.params.id;
-    var cart = new Cart(req.session.cart ? req.session.cart : {});
+    let productId = req.params.id;
+    let cart = new Cart(req.session.cart ? req.session.cart : {});
 
     Product.findById(productId, function(err, product) {
       if (err) {
@@ -269,12 +306,59 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
   router.get('/shoppingCart', function(req,res,next){
     if (!req.session.cart) {
       return res.render('shop/shoppingCart', {products: null});
-  } 
-   var cart = new Cart(req.session.cart);
+    } 
+   let cart = new Cart(req.session.cart);
    res.render('shop/shoppingCart', 
               {products: cart.generateArray(), 
               totalPrice: cart.totalPrice});
   })
+//#endregion
+///////////////////////////////////////////////////////
+//#region [rgba (5,55,55, 0.1)] Checkout 
+  router.get('/checkout', isLoggedIn, function(req, res, next){
+    if (!req.session.cart) {
+      return res.redirect('shop/shoppingCart');
+    } 
+    let cart = new Cart(req.session.cart);
+
+    res.render('shop/checkout', {total: cart.totalPrice});
+
+  });
+
+  router.post('/checkout', isLoggedIn, function(req, res, next) {
+    if (!req.session.cart) {
+      return res.redirect('shop/shoppingCart');
+    }
+
+    let cart = new Cart(req.session.cart);
+
+    // console.log("cart: " )
+    // console.log(req.session.cart)
+
+    let order = new Order({
+      email: req.session.email,
+      cart: cart,
+      name: req.body.name,
+      address: req.body.address,
+      creditCard: req.body.creditCard
+    });
+
+    // console.log("order: " )
+    // console.log(order)
+
+    order.save()
+      .then(()=>{
+        req.session.cart = null;
+        res.redirect('/');
+      })
+      .catch(function(err){
+          console.log(err);
+      })
+
+  });
+
+
+
 //#endregion
 
 // export const logedInObj = 'logedInObj';
