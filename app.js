@@ -3,13 +3,14 @@ var express               = require('express');
 var path                  = require('path');
 var cookieParser          = require('cookie-parser');
 var logger                = require('morgan');
-const exphbs              = require('express-handlebars');
-const mongoose            = require('mongoose');
-const Handlebars          = require('handlebars');
-const session             = require('express-session');
-const passport            = require('passport');
-const flash               = require('connect-flash');
-const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
+var exphbs                = require('express-handlebars');
+var mongoose              = require('mongoose');
+var Handlebars            = require('handlebars');
+var session               = require('express-session');
+// var MongoStore            = require('connect-mongo')(session);
+var passport              = require('passport');
+var flash                 = require('connect-flash');
+var {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
 
 var app = express();
 
@@ -39,13 +40,24 @@ mongoose.connect('mongodb://localhost/shopingdb')
     app.use(session({
       secret: "thisismysecrctekey",
       saveUninitialized: false,           //if empty value save?
-      // cookie: { maxAge: timeout },
-      resave: false                       //if we have not modified the sesion do you save?
+      cookie: { maxAge: timeout },
+      resave: false,                       //if we have not modified the sesion do you save?
+      // store: new MongoStore({ mongooseConnection: mongoose.connection })
     }));
     app.use(flash());
     app.use(passport.initialize());
     app.use(passport.session());
     app.use(express.static(path.join(__dirname, 'public')));
+    app.use(function(req, res, next) {
+      if(req.session.email){
+        res.locals.login =  true;
+      }else{
+        res.locals.login = false;
+      }
+      // console.log(res.locals.login)
+      res.locals.session = req.session;
+      next();
+  });
 
     app.use('/', indexRouter);
 

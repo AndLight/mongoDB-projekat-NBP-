@@ -6,6 +6,7 @@ let LocalStrategy   = require('passport-local').Strategy;
 var Product = require('../models/product');
 var User = require('../models/user');
 var passport = require('passport');
+var Cart = require('../models/cart');
 // const initializePassport  =require('../config/passport');
 
 const { body, validationResult } = require('express-validator');
@@ -186,6 +187,8 @@ router.post ('/user/signin',
                                     };
                                     if (data) {
                                       logedInMail = email;
+                                      sesionObj = req.session;
+                                      sesionObj.email=email;
                                       res.render('user/profile');
                                     };
                                   });
@@ -194,11 +197,18 @@ router.post ('/user/signin',
                         })
                     }
   });
-
+  let sesionObj;
   function isLoggedIn(req, res, next) {
-    if (logedInMail !== null) {
-        return next();
+    // if (logedInMail !== null) {
+    //     return next();
+    // }
+    // res.redirect('/user/signin');
+    if(req.session.email){
+      console.log("req.session: ")
+      console.log(req.session.email)
+      return next();
     }
+    console.log(req.session.email)
     res.redirect('/user/signin');
 }
 
@@ -220,23 +230,51 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
 ///////////////////////////////////////////////////////
 //#region [rgba (55,55,5, 0.1)] LOG OUT
   router.get('/user/logout', function(req, res, next){
-    if(logedInMail != null){
-      logedInMail = null;
-      res.render('user/logedOutSucess');
-    }else{
-      res.render('user/pleaseLogIn');
-    }
+    // if(logedInMail != null){
+    //   logedInMail = null;
+    //   res.render('user/logedOutSucess');
+    // }else{
+    //   res.render('user/pleaseLogIn');
+    // }
     // console.log("Log out ")
     // console.log(req.session)
     // req.mysession.destroy();
     // console.log("Log out after")
     // console.log(req.session)
     // res.redirect('/');
+    req.logout();
+    delete req.session.email;
+    // console.log("logout: ")
+    // console.log(req.session.email)
+    res.redirect('/');
   });
 //#endregion
 ///////////////////////////////////////////////////////
 //#region [rgba (128,5,5, 0.1)] SHOPING CART 
+  router.get('/add-to-cart/:id', function(req, res, next){
+    var productId = req.params.id;
+    var cart = new Cart(req.session.cart ? req.session.cart : {});
 
+    Product.findById(productId, function(err, product) {
+      if (err) {
+          return res.redirect('/');
+      }
+       cart.add(product, product.id);
+       req.session.cart = cart;
+       console.log(req.session.cart);
+       res.redirect('/');
+   });
+  });
+
+  router.get('/shoppingCart', function(req,res,next){
+    if (!req.session.cart) {
+      return res.render('shop/shoppingCart', {products: null});
+  } 
+   var cart = new Cart(req.session.cart);
+   res.render('shop/shoppingCart', 
+              {products: cart.generateArray(), 
+              totalPrice: cart.totalPrice});
+  })
 //#endregion
 
 // export const logedInObj = 'logedInObj';
