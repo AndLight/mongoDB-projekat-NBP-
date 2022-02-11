@@ -1,40 +1,25 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-const exphbs = require('express-handlebars');
-const mongoose = require('mongoose');
-const Handlebars = require('handlebars');
-const session = require('express-session');
-const passport = require('passport');
-const flash = require('connect-flash');
-require('./config/passport');
+var createError           = require('http-errors');
+var express               = require('express');
+var path                  = require('path');
+var cookieParser          = require('cookie-parser');
+var logger                = require('morgan');
+const exphbs              = require('express-handlebars');
+const mongoose            = require('mongoose');
+const Handlebars          = require('handlebars');
+const session             = require('express-session');
+const passport            = require('passport');
+const flash               = require('connect-flash');
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
 
 var app = express();
-// var mysesion = sessions();
 
-//#region [rgba (0,128,128, 0.1)] SESION SET UP
-//session middleware https://www.section.io/engineering-education/session-management-in-nodejs-using-expressjs-and-express-session/
-  
-  const timeout = 1000 * 60 * 60 * 2; //2h
-
-  // a variable to save a session
-  // let mysession = {email: ""};
-
-  //session set up
-  // app.use(session({
-  //   secret: "thisismysecrctekey",
-  //   saveUninitialized: false,           //if we have not modified the sesion do you save?
-  //   cookie: { maxAge: timeout },
-  //   resave: false                     //for every request to server make new sesion
-  // }));
-
-//#endregion    
-///////////////////////////////////////////////////////
+const timeout = 1000 * 60 * 60 * 2; //2h
 
 var indexRouter = require('./routes/index');
+const user = require('./models/user');
+
+
+
 
 // mongoose.connect('localhost: 27017/shopingdb');
 mongoose.connect('mongodb://localhost/shopingdb')
@@ -53,27 +38,14 @@ mongoose.connect('mongodb://localhost/shopingdb')
     app.use(cookieParser());
     app.use(session({
       secret: "thisismysecrctekey",
-      saveUninitialized: false,           //if we have not modified the sesion do you save?
-      cookie: { maxAge: timeout },
-      resave: false                     //for every request to server make new sesion
+      saveUninitialized: false,           //if empty value save?
+      // cookie: { maxAge: timeout },
+      resave: false                       //if we have not modified the sesion do you save?
     }));
-    //session maybe here
     app.use(flash());
     app.use(passport.initialize());
     app.use(passport.session());
     app.use(express.static(path.join(__dirname, 'public')));
-
-    // app.use(function(req, res, next){
-    //   if(logedInObj.email !== null){
-    //     res.locals.login = true;
-    //     console.log("Loged in")
-    //   }
-    //   else{
-    //     res.locals.login = false;
-    //     console.log("Not loged in")
-    //   }
-    //   next();
-    // });
 
     app.use('/', indexRouter);
 
@@ -97,4 +69,5 @@ mongoose.connect('mongodb://localhost/shopingdb')
 ///////////////////////////////////////////////////////
 
 module.exports = app;
+
 

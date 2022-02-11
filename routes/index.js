@@ -1,16 +1,16 @@
 var express = require('express');
 var router = express.Router();
+var bcrypt = require('bcrypt-nodejs')
+let LocalStrategy   = require('passport-local').Strategy;
 
 var Product = require('../models/product');
 var User = require('../models/user');
-// var csrf = require('csurf');
-var passport = require('passport')
-
-// var csrfProtection = csrf();
-// router.use(csrfProtection);       //All routs should be protected
+var passport = require('passport');
+// const initializePassport  =require('../config/passport');
 
 const { body, validationResult } = require('express-validator');
 
+// const users = [];
 
 //#region [rgba (128,128,128, 0.1)]  HOME PAGE
   router.get('/', function(req, res, next) {
@@ -71,22 +71,14 @@ const { body, validationResult } = require('express-validator');
                 .withMessage('Password must have at least one specal character')
                 ,
 
-              function(req, res, next){
+               function(req, res, next){
 
-
+                  
                     let email = req.body.email;
-                    let password = req.body.password;
-
-                    let helperObject = {
-                      email: email,
-                      password: password
-                    }
-                    
+                    let password = bcrypt.hashSync(req.body.password)
+                    // console.log(password)
                     const errors = validationResult(req);
-
                     if (!errors.isEmpty()) {
-
-
                           let message = [];
 
                           if(errors){
@@ -98,9 +90,7 @@ const { body, validationResult } = require('express-validator');
 
                           res.render('user/signup', {validationErr: message, helperObject: helperObject});
                     }
-
                     else{
-
                         User.findOne({'email': email}, function(err, userSearch){
 
                           if (err){
@@ -110,8 +100,7 @@ const { body, validationResult } = require('express-validator');
                           if (userSearch){
                                     console.log('Error: The user already exists')
                                     console.log(userSearch)
-                                    res.render('user/signup', {userErr: true, helperObject: helperObject});
-                                
+                                    res.render('user/signup', {userErr: true, helperObject: helperObject});   
                           }
                             else{
                                 const user = new User({
@@ -120,32 +109,32 @@ const { body, validationResult } = require('express-validator');
                                 });
                           
                                 user.save()
-                                  .then((result)=>{
-                                    // res.render('user/signup');
-                                  })
+                                  .then()
                                   .catch(function(err){
                                       console.log(err);
                                   })
-                                res.render('user/signup', {userSuc: true, helperObject: helperObject});
+                                // res.render('user/signup', {userSuc: true, helperObject: helperObject});
+                                res.render('user/signup', {userSuc: true});
                               }
                           
 
                         })
                     }
+                    
 
   });
+
+  
 //#endregion    
 ///////////////////////////////////////////////////////
 //#region [rgba (128,128,128, 0.1)] USER SIGNIN
-router.get ('/user/signin', notLoggedIn, function(req, res, next){
+router.get ('/user/signin', function(req, res, next){
   res.render('user/signin');
 });
 
+logedInMail= null;
 
-// let logedInObj = {
-//   email: null,
-//   password: null
-// }
+
 
 router.post ('/user/signin',
               body('email')
@@ -159,18 +148,14 @@ router.post ('/user/signin',
                 .withMessage('Password field cant be empty'),
 
               function(req, res, next){
-
-
                     let email = req.body.email;
                     let password = req.body.password;
-                    
-                    const errors = validationResult(req);
+                    // let password = bcrypt.hashSync(req.body.password);
 
+                    const errors = validationResult(req);
                     if (!errors.isEmpty()) {
 
-
                           let message = [];
-
                           if(errors){
                             errors.errors.forEach(function(error){
                               console.log(error.msg)
@@ -179,10 +164,7 @@ router.post ('/user/signin',
                           };
                             console.log(message)
                           res.render('user/signin', {validationErr: message, email: email});
-                    }
-
-                    else{
-
+                    }else{
                         User.findOne({'email': email}, function(err, userSearch){
 
                           if (err){
@@ -192,58 +174,40 @@ router.post ('/user/signin',
                           if (!userSearch){
                                     console.log('Error: The user does not exist')
                                     console.log(userSearch)
-                                    res.render('user/signin', {userErrU: true, email: email});
-                                
+                                    res.render('user/signin', {userErrU: true, email: email});     
                           }
                             else{
 
-                                if(userSearch.password != password){
-                                    console.log('Error: The wrong password')
-                                    console.log(userSearch.password)
-                                    res.render('user/signin', {userErrP: true, email: email});
-                                }
-                                  else{
-                                    //Dodaj nacin da se sacuva log in i prikaze profil info i funkcionalnost
-                                    // logedInObj.email = email;
-                                    // console.log(logedInObj);
-                                    
-                                    // req.mysession = req.sessions;
-                                    // console.log(mysession)
-
-                                    // req.mysession.email = email;
-                                    // console.log(mysession)
-                                    // console.log(req.session);
-                                    // console.log(req.session.email);
-
-                                    appLink.logedInObj.email = email;
-
-                                    res.render('user/profile');
-                                  }
+                                bcrypt.compare(password, userSearch.password, (err, data) => {
+                                    if (err) {
+                                      console.log(err);
+                                      console.log('Error: The wrong password');
+                                      res.render('user/signin', {userErrP: true, email: email});
+                                    };
+                                    if (data) {
+                                      logedInMail = email;
+                                      res.render('user/profile');
+                                    };
+                                  });
+                                  
                               }
                         })
                     }
   });
 
-  function isLoggedIn(req, res, next){
-      // if(req.session){
-      if(req.mysession){
-        console.log("isLoggedIn")
-        console.log(req.mysession)
+  function isLoggedIn(req, res, next) {
+    if (logedInMail !== null) {
         return next();
     }
-    res.redirect('user/pleaseLogIn')
-  }
+    res.redirect('/user/signin');
+}
 
-  function notLoggedIn(req, res, next){
-    // if(!req.session){
-    if(!req.mysession){
-      console.log("notLoggedIn")
-      console.log(req.mysession)
-      return next();
+function notLoggedIn(req, res, next) {
+    if (logedInMail == null) {
+        return next();
     }
-    res.redirect('/')
-  }
-
+    res.redirect('/');
+}
 //#endregion
 ///////////////////////////////////////////////////////
 //#region [rgba (128,5,128, 0.1)] PROFILE PAGE 
@@ -256,17 +220,18 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
 ///////////////////////////////////////////////////////
 //#region [rgba (55,55,5, 0.1)] LOG OUT
   router.get('/user/logout', function(req, res, next){
-    // if(logedInObj.email != null){
-    //   logedInObj.email = null;
-    //   res.render('user/logedOutSucess');
-    // }
-    //   res.render('user/pleaseLogIn');
-    console.log("Log out ")
-    console.log(req.session)
-    req.mysession.destroy();
-    console.log("Log out after")
-    console.log(req.session)
-    res.redirect('/');
+    if(logedInMail != null){
+      logedInMail = null;
+      res.render('user/logedOutSucess');
+    }else{
+      res.render('user/pleaseLogIn');
+    }
+    // console.log("Log out ")
+    // console.log(req.session)
+    // req.mysession.destroy();
+    // console.log("Log out after")
+    // console.log(req.session)
+    // res.redirect('/');
   });
 //#endregion
 ///////////////////////////////////////////////////////
