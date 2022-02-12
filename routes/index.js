@@ -3,6 +3,7 @@ let router = express.Router();
 let bcrypt = require('bcrypt-nodejs')
 let LocalStrategy   = require('passport-local').Strategy;
 let passport = require('passport');
+var ObjectID = require('mongodb').ObjectID;
 
 let Product = require('../models/product');
 let User = require('../models/user');
@@ -229,23 +230,23 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
       // console.log(order.cart.items)
       cart = new Cart(order.cart);
 
-      console.log("cart: ")
-      console.log(cart)
-      console.log("////////////////////////////////////////////////")
+      // console.log("cart: ")
+      // console.log(cart)
+      // console.log("////////////////////////////////////////////////")
 
       order.items = cart.generateArray();
       orderArr.push(cart.generateArray());
       
-      console.log("order.cart")
-      console.log(order.items)
+      // console.log("order.cart")
+      // console.log(order.items)
     })
-    console.log("////////////////////////////////////////////////")
-    console.log("orders")
-    console.log(orders)
+    // console.log("////////////////////////////////////////////////")
+    // console.log("orders")
+    // console.log(orders)
 
-    console.log("////////////////////////////////////////////////")
-    console.log("orderArr")
-    console.log(orderArr)
+    // console.log("////////////////////////////////////////////////")
+    // console.log("orderArr")
+    // console.log(orderArr)
     // let br = 0;
     // orders.forEach(function(ord){
     //   console.log(br)
@@ -260,6 +261,86 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
   // res.render('user/profile');
 });
 
+router.get('/deleteUser/:mail', isLoggedIn, function(req, res, next){
+    console.log(req.params.mail)
+    //dodaj LOG OUT stvari
+
+    //dodaj delete stvari
+    let del = { email: req.params.mail};
+
+    User.deleteOne(del, function(err, responce) {
+      if (err) {console.log(err)};
+
+      req.logout();
+      delete req.session.email;
+      delete req.session.cart;
+      
+      console.log("user deleted "+del.email);
+      res.render('user/signup', {deleteSuc: true});
+
+
+    // res.redirect('/');
+    });
+  });
+
+  router.get('/changePasRed/:mail', isLoggedIn, function(req, res, next){
+    let mail =  req.params.mail;
+    res.render('user/changePassword', {mail: mail})
+  });
+
+  router.post('/changePas', isLoggedIn, function(req, res, next){
+      console.log("changePas")
+    // let mail =  req.params.mail;
+    let mail = req.body.email;
+    // let newPassword = req.body.password;
+      // console.log("newPassword");
+      // console.log(newPassword);
+      // console.log("mail");
+      // console.log(mail);
+    // let old;
+    // let newP;
+    // let id;
+    let password = bcrypt.hashSync(req.body.password);
+
+    // User.findOne({'email': mail}, function(err, userSearch){
+    //   // console.log(userSearch);
+    //   old = userSearch;
+    //   newP = userSearch;
+    //   // id = ObjectID(old._id);
+
+
+    //     // console.log("old.password")
+    //     // console.log(old.password)
+    //     // console.log("old._id")
+    //     // console.log(old._id)
+
+    //   newP.password = bcrypt.hashSync(newPassword);
+    //     // password = bcrypt.hashSync(newPassword);
+
+    //     // console.log("newP.password")
+    //     // console.log(password)
+    //     // console.log(newP)
+    // });
+    // password = newP.password;
+
+    // console.log("password")
+    // console.log(password)
+
+    User.updateOne({"email": mail},  {$set: {"password" : password }})
+      .then((result)=>{
+        console.log("Update result: ")
+        console.log(result)
+        res.redirect('/');
+      })
+      .catch(function(err){
+        console.log(err);
+      })
+
+
+    
+
+    // res.redirect('/');
+  });
 
 //#endregion
 ///////////////////////////////////////////////////////
@@ -357,7 +438,26 @@ router.get ('/user/profile',isLoggedIn, function(req, res, next){
 
   });
 
+  router.get('/reduce/:id', function(req, res, next) {
+    // console.log("reduce ///////////////////////")
+    // console.log(req.params.id)
+    // console.log(req.session.cart)
+    var productId = req.params.id;
+    var cart = new Cart(req.session.cart ? req.session.cart : {});
 
+    cart.reduceByOne(productId);
+    req.session.cart = cart;
+    res.redirect('/shoppingCart');
+});
+
+router.get('/remove/:id', function(req, res, next) {
+    var productId = req.params.id;
+    var cart = new Cart(req.session.cart ? req.session.cart : {});
+
+    cart.removeItem(productId);
+    req.session.cart = cart;
+    res.redirect('/shoppingCart');
+});
 
 //#endregion
 

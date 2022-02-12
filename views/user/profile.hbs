@@ -1,7 +1,11 @@
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
-        <h1>Profile for {{mail}}</h1>
+        <h1>Profile for {{mail}}</h1> 
+        {{!-- <button type="submit" href="/delete/{{mail}}" class="btn btn-danger">Delete profile</button> --}}
+        <a href="/deleteUser/{{mail}}" type="button" class="btn btn-danger">Delete profile</a>
+        <a href="/changePasRed/{{mail}}" type="button" class="btn btn-secondary">Change password</a>
         <hr>
+
 
         {{#each orders}}
         <div class="container">

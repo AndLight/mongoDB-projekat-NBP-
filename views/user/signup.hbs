@@ -22,6 +22,10 @@
                     <div class="alert alert-success">The user is added</div>
                 {{/if}}
 
+                {{#if deleteSuc}}
+                    <div class="alert alert-success">User deleted</div>
+                {{/if}}
+
                 <form action="/user/signup" method="post">
 
                     <div class="form-group">

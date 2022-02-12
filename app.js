@@ -7,7 +7,7 @@ var exphbs                = require('express-handlebars');
 var mongoose              = require('mongoose');
 var Handlebars            = require('handlebars');
 var session               = require('express-session');
-// var MongoStore            = require('connect-mongo')(session);
+var ObjectID              = require('mongodb').ObjectID;
 var passport              = require('passport');
 var flash                 = require('connect-flash');
 var {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
@@ -57,8 +57,7 @@ mongoose.connect('mongodb://localhost/shopingdb')
       // console.log(res.locals.login)
       res.locals.session = req.session;
       next();
-  });
-
+    });
     app.use('/', indexRouter);
 
     // catch 404 and forward to error handler
