@@ -1,0 +1,12 @@
+1. Konektovani smo na mongo bazu u app.js linija 26
+	Baza se zove shopingdb
+	Pokrenite je
+2. Instalirati dependencies sa "npm install"
+3. doci u folder seed i pokrenuti fajl product-seed sa "node product-seed.js"
+	Ovo ce staviti knjige u bazu podataka
+4. vratite se u folder projekta i pokrenite ga 
+	ili koristeci nodemon (ako Vam je instaliran)
+	ili naredbom "node app.js"
+	
+5. napravite nalog i uzivajte u kupovini
+	
