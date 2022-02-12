@@ -137,8 +137,6 @@ router.get ('/user/signin', function(req, res, next){
 
 logedInMail= null;
 
-
-
 router.post ('/user/signin',
               body('email')
                 .notEmpty()
@@ -180,12 +178,22 @@ router.post ('/user/signin',
                                     res.render('user/signin', {userErrU: true, email: email});     
                           }
                             else{
+                              // console.log('bcrypt ///////////////////////')
+                              // console.log(bcrypt.compare(password, userSearch.password, (err, data)=> {if(err) console.log(err); console.log(data)}));
+
+                                // if(!(bcrypt.compare(password, userSearch.password))){
+                                //   console.log('Error: The wrong password');
+                                //   res.render('user/signin', {userErrP: true, email: email});
+                                // }else{
+                                //   logedInMail = email;
+                                //       sesionObj = req.session;
+                                //       sesionObj.email=email;
+                                //       res.redirect('/')
+                                // }
 
                                 bcrypt.compare(password, userSearch.password, (err, data) => {
                                     if (err) {
                                       console.log(err);
-                                      console.log('Error: The wrong password');
-                                      res.render('user/signin', {userErrP: true, email: email});
                                     };
                                     if (data) {
                                       logedInMail = email;
@@ -193,7 +201,10 @@ router.post ('/user/signin',
                                       sesionObj.email=email;
                                       // res.render('user/profile');
                                       res.redirect('/')
-                                    };
+                                    }else{
+                                      console.log('Error: The wrong password');
+                                      res.render('user/signin', {userErrP: true, email: email});
+                                    }
                                   });
                                   
                               }
